@@ -1,0 +1,138 @@
+dataset: ec
+stats_file: ./data/era5_stats_1980-2018.pkl
+
+dtm_exp: era5_prog_newp
+prob_exp: p7
+dtm_model: swin_transformer_3d
+prob_model: condDiT
+member_number: 5
+
+model:
+  name: condDiT
+  swin_transformer_3d:
+    patch_size: [2, 4, 4]
+    embed_dim: 192
+    window_size: [2, 7, 7]
+    depths: [2, 6, 2]
+    num_heads: [3, 6, 12]
+    add_boundary: False
+    use_checkpoint: False
+    earth_position: False
+    window_parition_shapes: [(4, 9, 11), (4, 5, 6), (4, 9, 11)]
+    mlp_embedding: True
+    frozen_stages: -1
+    upsampler: bilinear_conv
+
+  autoencoder_kl_gan:
+    embed_dim: 16
+    lossconfig:
+      target: ldm.modules.losses.LPIPSWithDiscriminator
+      params:
+        disc_start: 50001
+        kl_weight: 0.000001
+        disc_weight: 0.5
+    ddconfig:
+      double_z: True
+      z_channels: 16
+      resolution: 900
+      in_channels: 1
+      out_ch: 1
+      ch: 16
+      ch_mult: [ 1, 2, 4, 4]  # num_down = len(ch_mult)-1
+      num_res_blocks: 2
+      attn_resolutions: [16, 8]
+      dropout: 0.0
+
+  condDiT:
+    diffconfig:
+      timestep_respacing: ""
+      noise_schedule: "linear" 
+      use_kl: False
+      sigma_small: False
+      predict_xstart: False
+      learn_sigma: True
+      rescale_learned_sigmas: False
+      diffusion_steps: 1000
+      num_sampling_steps: "300"
+    denoiseconfig:
+      img_size: [90, 140] 
+      patch_size: [2, 2]
+      in_channels: 16
+      cond_channels: 70
+      depth: 12 
+      hidden_size: 96
+      num_heads: 6
+    vaeconfig:
+      vae_model: autoencoder_kl_gan
+      
+  pretrain: None
+  finetune: full
+  mp: False
+  
+
+hyper_params:
+  batch_size: 3
+  EPOCH: 100
+  PATIENCE: 30
+  sample_interval: 1
+  lr: 0.0001
+  optimizer: AdamW
+  weight_decay: 0.0001
+  scheduler: cosineannealingwarmrestart
+  grad_accum: 1
+  loss: mse_ssim
+  verbose_step: 12
+  input_step: 2
+  start_lead: 0
+  forecast_step: 1
+  use_static: True
+  time_encoding: False
+  position_encoding: False
+  level_encoding: False
+  add_latlon_time: True
+  norm_method: meanstd
+  warmup_lr: True
+
+scale_factor: 0.83334 # 0.18215
+fcst_tp: True
+loss_weighting: True
+target: tp_era5
+on_cloud: True
+type: ''
+
+start_time: "2024-08-05_12"
+end_time: "2024-08-31_23"
+lead_time: 120
+start_interval_hour: 24
+
+input:
+  surface:
+  - 2mt
+  - mslp
+  - 10m_u_component_of_wind
+  - 10m_v_component_of_wind
+  high:
+  - geopotential
+  - temperature
+  - specific_humidity
+  - u_component_of_wind
+  - v_component_of_wind
+  levels: 
+  - 1000
+  - 925
+  - 850
+  - 700
+  - 600
+  - 500
+  - 400
+  - 300
+  - 250
+  - 200
+  - 150
+  - 100
+  - 50
+
+output:
+  surface:
+  - tp
+ 

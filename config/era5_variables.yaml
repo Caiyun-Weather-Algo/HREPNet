@@ -1,0 +1,102 @@
+surface:
+  2mt: 
+    var_name: t2m
+    minmax: 
+    - 223.15
+    - 313.15
+    meanstd:
+    - 
+    - 
+    folder: 2m_Temperature
+    unit: K
+
+  mslp:
+    var_name: msl
+    minmax: 
+    - 1000
+    - 1050
+    meanstd:
+    - 
+    - 
+    folder: MSLP
+    unit: hPa
+
+  10m_u_component_of_wind:
+    var_name: u10
+    minmax: 
+    - -30
+    - 30
+    folder: 10m_u_component_of_wind
+    unit: m/s
+
+  10m_v_component_of_wind:
+    var_name: v10
+    minmax: 
+    - -30
+    - 30
+    folder: 10m_v_component_of_wind
+    unit: m/s
+    
+  total_precipitation:
+    var_name: tp
+    minmax: 
+    - -30
+    - 30
+    folder: Total_Precipitation
+    unit: mm/h
+
+
+
+high:
+  geopotential:
+    var_name: z
+    minmax: 
+    - 0
+    - 160
+    folder: geopotential
+    unit: m2/s2
+  temperature:
+    var_name: t
+    minmax: 
+    - 185.15
+    - 310.15
+    folder: temperature
+    unit: K
+  specific_humidity:
+    var_name: q
+    minmax: 
+    - 0
+    - 0.02
+    folder: specific_humidity
+    unit: kg/kg
+  u_component_of_wind:
+    var_name: u
+    minmax: 
+    - -60
+    - 60
+    folder: u_component_of_wind
+    unit: m/s
+  v_component_of_wind:
+    var_name: v
+    minmax: 
+    - -60
+    - 60
+    folder: v_component_of_wind
+    unit: m/s
+  qcloud:
+    var_name: clwc
+    minmax: 
+    - 
+    - 
+    folder: 
+    unit: kg/kg
+  qice:
+    var_name: ciwc
+    minmax: 
+    - 
+    - 
+    folder: 
+    unit: kg/kg
+
+
+  

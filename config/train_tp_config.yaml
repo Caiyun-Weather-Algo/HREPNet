@@ -1,0 +1,147 @@
+base_path: /home/hess/HREPNet-base
+remote_path: /home/hess/HREPNet-base
+era5_path: /home/hess/bucket/era5_china_src
+cmpa_path: /home/hess/bucket/cmpa_5km
+dataset: prob # modify the model name based on model to be trained, 0-dtm, 1-dtm_hr, 2-prob
+model:
+  name: condDiT # modify the model name based on model to be trained, 0-swin_transformer_3d, 1-swin_transformer_3d_hr, 2
+  swin_transformer_3d:
+    patch_size: [2, 4, 4]
+    embed_dim: 192
+    window_size: [2, 7, 7]
+    depths: [2, 6, 2]
+    num_heads: [3, 6, 12]
+    add_boundary: False
+    use_checkpoint: False
+    earth_position: False
+    window_parition_shapes: [(4, 9, 11), (4, 5, 6), (4, 9, 11)]
+    mlp_embedding: True
+    upsampler: bilinear_conv
+
+  swin_transformer_3d_hr:
+    patch_size: [2, 4, 4]
+    embed_dim: 96
+    window_size: [2, 7, 7]
+    depths: [2, 2, 2]
+    num_heads: [3, 6, 12]
+    add_boundary: False
+    use_checkpoint: False
+    earth_position: False
+    window_parition_shapes: [(4, 9, 11), (4, 5, 6), (4, 9, 11)]
+    mlp_embedding: True
+    upsampler: bilinear_conv
+
+  autoencoder_kl_gan:
+    embed_dim: 16
+    lossconfig:
+      target: ldm.modules.losses.LPIPSWithDiscriminator
+      params:
+        disc_start: 50001
+        kl_weight: 0.000001
+        disc_weight: 0.5
+    ddconfig:
+      double_z: True
+      z_channels: 16
+      resolution: 900
+      in_channels: 1
+      out_ch: 1
+      ch: 16
+      ch_mult: [ 1, 2, 4, 4]  # num_down = len(ch_mult)-1
+      num_res_blocks: 2
+      attn_resolutions: [16, 8]
+      dropout: 0.0
+
+  condDiT:
+    diffconfig:
+      timestep_respacing: ""
+      noise_schedule: "linear" 
+      use_kl: False
+      sigma_small: False
+      predict_xstart: False
+      learn_sigma: True
+      rescale_learned_sigmas: False
+      diffusion_steps: 1000
+      num_sampling_steps: "300"
+    denoiseconfig:
+      img_size: [90, 140] 
+      patch_size: [2, 2]
+      in_channels: 16
+      cond_channels: 70
+      depth: 12 
+      hidden_size: 96
+      num_heads: 6
+    vaeconfig:
+      vae_model: autoencoder_kl_gan
+      vae_path: /home/hess/bucket/hess/autoencoder_kl_gan_expp2/models/
+      
+  pretrain: None
+  finetune: full
+  mp: False
+  
+
+hyper_params:
+  batch_size: 2
+  EPOCH: 30
+  PATIENCE: 30
+  sample_interval: 1
+  lr: 3e-4
+  optimizer: AdamW
+  weight_decay: 0.0001
+  scheduler: cosineannealingwarmrestart
+  grad_accum: 2
+  loss: bmae_radar
+  verbose_step: 6
+  input_step: 1
+  start_lead: 0
+  forecast_step: 1
+  use_static: True
+  add_latlon_time: True
+  norm_method: meanstd
+  warmup_lr: True
+
+scale_factor: 0.83334 # 0.18215
+
+exp: p7 # modify the exp name based on experiments
+bc_mode2: False
+fcst_tp: True
+loss_weighting: True
+target: tp_era5
+on_cloud: True
+
+start_time: "2018-01-01_00"
+end_time: "2021-08-31_23"
+valid_time: "2020-01-01_00"
+test_time: "2021-08-01_00"
+
+input:
+  surface:
+  - 2mt
+  - mslp
+  - 10m_u_component_of_wind
+  - 10m_v_component_of_wind
+  # - total_precipitation
+  high:
+  - geopotential
+  - temperature
+  - specific_humidity
+  - u_component_of_wind
+  - v_component_of_wind
+  levels: 
+  - 1000
+  - 925
+  - 850
+  - 700
+  - 600
+  - 500
+  - 400
+  - 300
+  - 250
+  - 200
+  - 150
+  - 100
+  - 50
+
+output:
+  surface:
+  - tp
+
